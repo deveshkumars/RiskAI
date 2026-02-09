@@ -12,6 +12,7 @@ interface ActionPanelProps {
   selectedTerritory: string | null;
   onAction: (action: GameAction) => void;
   isHumanTurn: boolean;
+  aiThought?: string | null;
 }
 
 export function ActionPanel({
@@ -21,6 +22,7 @@ export function ActionPanel({
   selectedTerritory,
   onAction,
   isHumanTurn,
+  aiThought,
 }: ActionPanelProps) {
   const { phase, reinforcementsRemaining, lastCombatResult } = state;
   const getName = (id: string) =>
@@ -30,6 +32,12 @@ export function ActionPanel({
     return (
       <div className="action-panel">
         <div className="ai-thinking">AI is thinking...</div>
+        {aiThought && (
+          <div className="ai-thought-bubble">
+            <span className="ai-thought-icon">💭</span>
+            <span className="ai-thought-text">{aiThought}</span>
+          </div>
+        )}
         {lastCombatResult && <DiceDisplay combat={lastCombatResult} />}
       </div>
     );

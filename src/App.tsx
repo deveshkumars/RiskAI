@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type { Player, GameAction } from './engine/types';
 import { MAP_DATA } from './map/mapData';
 import { useGameState } from './hooks/useGameState';
@@ -23,12 +23,25 @@ function GameView({ players }: { players: Player[] }) {
   } = useGameState(players, MAP_DATA);
 
   const [selectedTerritory, setSelectedTerritory] = useState<string | null>(null);
+  const [aiThought, setAiThought] = useState<string | null>(null);
+  const aiThoughtTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentPlayer = state.players[state.currentPlayerIndex];
   const isHumanTurn = currentPlayer.type === 'human';
 
+  // Clear AI thought when it becomes a human turn
+  const handleAiThought = useCallback((thought: string | null) => {
+    // Clear any pending fade-out timer
+    if (aiThoughtTimerRef.current) clearTimeout(aiThoughtTimerRef.current);
+    setAiThought(thought);
+    // Auto-clear after 5 seconds so old thoughts don't linger
+    if (thought) {
+      aiThoughtTimerRef.current = setTimeout(() => setAiThought(null), 5000);
+    }
+  }, []);
+
   // Drive AI turns
-  useGameLoop(state, getAgent, dispatch, serializedState, validActions);
+  useGameLoop(state, getAgent, dispatch, serializedState, validActions, handleAiThought);
 
   // Compute valid targets for the selected territory
   const validTargets = useMemo(() => {
@@ -145,6 +158,7 @@ function GameView({ players }: { players: Player[] }) {
             selectedTerritory={selectedTerritory}
             onAction={handleAction}
             isHumanTurn={isHumanTurn}
+            aiThought={aiThought}
           />
         </div>
 

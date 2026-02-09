@@ -6,6 +6,7 @@ import type {
   IPlayerAgent,
   SerializedGameState,
 } from '../engine/types';
+import { LLMAgent } from '../ai/LLMAgent';
 import { AI_MOVE_DELAY_MS } from '../engine/constants';
 
 export function useGameLoop(
@@ -13,7 +14,8 @@ export function useGameLoop(
   getAgent: (playerId: PlayerId) => IPlayerAgent,
   dispatch: (action: GameAction) => void,
   serializedState: SerializedGameState,
-  validActions: GameAction[]
+  validActions: GameAction[],
+  onAiThought?: (thought: string | null) => void
 ) {
   const isRunning = useRef(false);
 
@@ -41,6 +43,10 @@ export function useGameLoop(
           state.phase
         );
         if (!cancelled) {
+          // Extract reasoning if the agent is an LLMAgent
+          if (agent instanceof LLMAgent && agent.lastReasoning) {
+            onAiThought?.(agent.lastReasoning);
+          }
           dispatch(action);
         }
       } catch (err) {

@@ -11,7 +11,8 @@
       "WebFetch(domain:api.github.com)",
       "Bash(node:*)",
       "Bash(lsof:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ls:*)"
     ]
   }
 }
